@@ -7,7 +7,8 @@ const chatContainer = document.getElementById('chatContainer');
 
 // Определяем базовый URL для API
 const BASE_URL = window.location.hostname === 'localhost'
-    : 'http://localhost:5000';  // Замените на ваш локальный IP-адрес
+    ? 'http://localhost:5000'
+    : 'http://192.168.1.212:5000';  // Используем локальный IP-адрес сервера
 
 function addMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
@@ -17,8 +18,8 @@ function addMessage(text, isUser = false) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// Добавляем приветственное сообщение
-addMessage('Бот готов к общению! Напишите ваше соо0000бщение.');
+// Добавляем приветственное сообщение и информацию о подключении
+addMessage('Бот готов к общению! Напишите ваше сообщение.');
 addMessage(`Подключение к серверу: ${BASE_URL}`);
 
 async function sendMessage() {
@@ -33,7 +34,8 @@ async function sendMessage() {
         const response = await fetch(`${BASE_URL}/api/chat/`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
             },
             body: JSON.stringify({
                 message: message,
