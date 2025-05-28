@@ -19,7 +19,7 @@ function addMessage(text, isUser = false) {
 }
 
 // Добавляем приветственное сообщение
-addMessage('Бот готов к общению! Напишите ваше сообщение.');
+addMessage('Бот готов к общению! Напишите ваше соо0000бщение.');
 addMessage(`Подключение к серверу: ${BASE_URL}`);
 
 async function sendMessage() {
