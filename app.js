@@ -23,23 +23,39 @@ addMessage('Бот готов к общению! Напишите ваше со�
 addMessage(`Подключение к серверу: ${BASE_URL}`);
 
 // Проверка доступности сервера
-fetch(`${BASE_URL}/api/chat/`, {
-    method: 'OPTIONS',
-    headers: {
-        'Content-Type': 'application/json'
-    }
-})
-    .then(response => {
-        if (response.ok) {
+async function testConnection() {
+    try {
+        addMessage('🔄 Проверка подключения к серверу...');
+
+        const response = await fetch(`${BASE_URL}/test`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (data.status === 'ok') {
             addMessage('✅ Сервер доступен и отвечает');
+            return true;
         } else {
-            addMessage('❌ Сервер отвечает с ошибкой: ' + response.status);
+            addMessage('❌ Сервер отвечает некорректно');
+            return false;
         }
-    })
-    .catch(error => {
-        addMessage('❌ Ошибка подключения к серверу: ' + error.message);
+    } catch (error) {
+        addMessage(`❌ Ошибка подключения к серверу: ${error.message}`);
+        addMessage('💡 Возможные причины:');
+        addMessage('1. Сервер не запущен');
+        addMessage('2. Брандмауэр Windows блокирует подключение');
+        addMessage('3. Неверный IP-адрес сервера');
+        addMessage(`4. CORS не настроен (проверьте консоль F12)`);
         console.error('Ошибка проверки сервера:', error);
-    });
+        return false;
+    }
+}
+
+// Запускаем проверку при загрузке
+testConnection();
 
 async function sendMessage() {
     const message = messageInput.value.trim();
@@ -57,8 +73,6 @@ async function sendMessage() {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            mode: 'cors',
-            credentials: 'omit',
             body: JSON.stringify({
                 message: message,
                 user_id: tg.initDataUnsafe?.user?.id || '12345'
@@ -82,8 +96,9 @@ async function sendMessage() {
         }
     } catch (error) {
         console.error('Ошибка при отправке:', error);
-        addMessage(`Ошибка соединения: ${error.message}`);
-        addMessage('Проверьте консоль браузера (F12) для деталей ошибки');
+        addMessage(`❌ Ошибка: ${error.message}`);
+        // Повторная проверка соединения при ошибке
+        testConnection();
     } finally {
         sendButton.disabled = false;
     }
