@@ -6,7 +6,9 @@ const sendButton = document.getElementById('sendButton');
 const chatContainer = document.getElementById('chatContainer');
 
 // Определяем базовый URL для API
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'http://192.168.0.1:5000';  // Замените на ваш локальный IP-адрес
 
 function addMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
@@ -18,6 +20,7 @@ function addMessage(text, isUser = false) {
 
 // Добавляем приветственное сообщение
 addMessage('Бот готов к общению! Напишите ваше сообщение.');
+addMessage(`Подключение к серверу: ${BASE_URL}`);
 
 async function sendMessage() {
     const message = messageInput.value.trim();
