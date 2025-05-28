@@ -5,8 +5,6 @@ const messageInput = document.getElementById('messageInput');
 const sendButton = document.getElementById('sendButton');
 const chatContainer = document.getElementById('chatContainer');
 
-let isProcessing = false;
-
 function addMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
@@ -15,40 +13,35 @@ function addMessage(text, isUser = false) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-async function sendMessage() {
-    if (isProcessing || !messageInput.value.trim()) return;
+// Добавляем приветственное сообщение
+addMessage('Бот готов к общению! Напишите ваше сообщение.');
 
+async function sendMessage() {
     const message = messageInput.value.trim();
+    if (!message) return;
+
     messageInput.value = '';
     addMessage(message, true);
-
-    isProcessing = true;
     sendButton.disabled = true;
 
     try {
-        const response = await fetch('https://your-backend-url.com/api/chat', {
+        const response = await fetch('http://localhost:5000/api/chat/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tg.initData}`
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                message: message,
-                init_data: tg.initData
-            })
+            body: JSON.stringify({ message: message })
         });
 
         const data = await response.json();
-
-        if (response.ok) {
+        if (data.response) {
             addMessage(data.response);
-        } else {
+        } else if (data.error) {
             addMessage(`Ошибка: ${data.error}`);
         }
     } catch (error) {
-        addMessage(`Ошибка: ${error.message}`);
+        addMessage(`Ошибка соединения: ${error.message}`);
     } finally {
-        isProcessing = false;
         sendButton.disabled = false;
     }
 }
