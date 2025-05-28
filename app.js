@@ -25,21 +25,34 @@ async function sendMessage() {
     sendButton.disabled = true;
 
     try {
+        console.log('Отправка запроса...');
         const response = await fetch('http://localhost:5000/api/chat/', {
             method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({ message: message })
         });
 
+        console.log('Получен ответ:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log('Данные ответа:', data);
+
         if (data.response) {
             addMessage(data.response);
         } else if (data.error) {
             addMessage(`Ошибка: ${data.error}`);
         }
     } catch (error) {
+        console.error('Ошибка при отправке:', error);
         addMessage(`Ошибка соединения: ${error.message}`);
     } finally {
         sendButton.disabled = false;
