@@ -22,6 +22,25 @@ function addMessage(text, isUser = false) {
 addMessage('Бот готов к общению! Напишите ваше сообщение.');
 addMessage(`Подключение к серверу: ${BASE_URL}`);
 
+// Проверка доступности сервера
+fetch(`${BASE_URL}/api/chat/`, {
+    method: 'OPTIONS',
+    headers: {
+        'Content-Type': 'application/json'
+    }
+})
+    .then(response => {
+        if (response.ok) {
+            addMessage('✅ Сервер доступен и отвечает');
+        } else {
+            addMessage('❌ Сервер отвечает с ошибкой: ' + response.status);
+        }
+    })
+    .catch(error => {
+        addMessage('❌ Ошибка подключения к серверу: ' + error.message);
+        console.error('Ошибка проверки сервера:', error);
+    });
+
 async function sendMessage() {
     const message = messageInput.value.trim();
     if (!message) return;
@@ -31,23 +50,31 @@ async function sendMessage() {
     sendButton.disabled = true;
 
     try {
+        console.log('Отправка запроса на:', `${BASE_URL}/api/chat/`);
         const response = await fetch(`${BASE_URL}/api/chat/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
+                'Accept': 'application/json'
             },
+            mode: 'cors',
+            credentials: 'omit',
             body: JSON.stringify({
                 message: message,
                 user_id: tg.initDataUnsafe?.user?.id || '12345'
             })
         });
 
+        console.log('Получен ответ:', response);
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('Данные ответа:', data);
+
         if (data.response) {
             addMessage(data.response);
         } else if (data.error) {
@@ -55,7 +82,8 @@ async function sendMessage() {
         }
     } catch (error) {
         console.error('Ошибка при отправке:', error);
-        addMessage(`Ошибка соединения: ${error.message}. Проверьте, что сервер запущен на ${BASE_URL}`);
+        addMessage(`Ошибка соединения: ${error.message}`);
+        addMessage('Проверьте консоль браузера (F12) для деталей ошибки');
     } finally {
         sendButton.disabled = false;
     }
