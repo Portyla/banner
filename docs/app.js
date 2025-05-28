@@ -30,8 +30,15 @@ async function sendMessage() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ message: message })
+            body: JSON.stringify({
+                message: message,
+                user_id: tg.initDataUnsafe?.user?.id || '12345'
+            })
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
         if (data.response) {
@@ -40,6 +47,7 @@ async function sendMessage() {
             addMessage(`Ошибка: ${data.error}`);
         }
     } catch (error) {
+        console.error('Ошибка при отправке:', error);
         addMessage(`Ошибка соединения: ${error.message}`);
     } finally {
         sendButton.disabled = false;
