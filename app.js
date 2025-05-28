@@ -7,8 +7,7 @@ const chatContainer = document.getElementById('chatContainer');
 
 // Определяем базовый URL для API
 const BASE_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:5000'
-    : 'https://portyla.github.io/banner/';  // Замените на ваш локальный IP-адрес
+    : 'http://localhost:5000';  // Замените на ваш локальный IP-адрес
 
 function addMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
