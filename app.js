@@ -7,8 +7,8 @@ const chatContainer = document.getElementById('chatContainer');
 
 // Определяем базовый URL для API
 const BASE_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:5000'
-    : 'http://192.168.1.212:5000';  // Используем локальный IP-адрес сервера
+    ? 'http://localhost:8080'
+    : 'http://192.168.1.212:8080';  // Используем локальный IP-адрес сервера и порт 8080
 
 function addMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
@@ -27,7 +27,20 @@ async function testConnection() {
     try {
         addMessage('🔄 Проверка подключения к серверу...');
 
-        const response = await fetch(`${BASE_URL}/test`, {
+        // Сначала проверяем корневой URL
+        let response = await fetch(`${BASE_URL}/`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Сервер недоступен: ${response.status}`);
+        }
+
+        // Затем проверяем тестовый эндпоинт
+        response = await fetch(`${BASE_URL}/test`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -46,7 +59,7 @@ async function testConnection() {
         addMessage(`❌ Ошибка подключения к серверу: ${error.message}`);
         addMessage('💡 Возможные причины:');
         addMessage('1. Сервер не запущен');
-        addMessage('2. Брандмауэр Windows блокирует подключение');
+        addMessage('2. Брандмауэр Windows блокирует порт 8080');
         addMessage('3. Неверный IP-адрес сервера');
         addMessage(`4. CORS не настроен (проверьте консоль F12)`);
         console.error('Ошибка проверки сервера:', error);
